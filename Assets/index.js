@@ -3,17 +3,17 @@ $(document).ready(function() {
 var today = moment();
 
 $("#currentDay").text(today.format("[The date today is] dddd MMM Do, YYYY [and the time is] h:mm a"));
+// variables for each id needed from HTML
 var city="";
-
 var currentCity = $("#current-city");
 var searchCity = $("#search-city");
 var searchButton = $('#search-button');
 var clearButton = $("#clear-history");
-let currentHumidity= $("#humidity");
+var currentHumidity= $("#humidity");
 var currentTemperature = $("#temperature");
-let currentWSpeed= $("#wind-speed");
+var currentWSpeed= $("#wind-speed");
 var sCity =[];
-
+var currentDescription = $('#description');
 
 function find(c){
     for (var i=0; i<sCity.length; i++){
@@ -31,16 +31,19 @@ function getWeather(event){
         currentWeather(city);
     }
 }
-// Here we create the AJAX call
+
+// we call the fetch api here to get information and icons about the weather.
 function currentWeather(city){
 
       fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${APIKey}`)
       .then((res) => res.json())
       .then(function(response){
         console.log(response)
+        
         // parse the response to display the current weather including the City name. the Date and the weather icon. 
-       
-        //Dta object from server side Api for icon property.
+        const description = response.weather[0].description;
+       $(currentDescription).html(description);
+        //Data object from server side Api for icon property.
         const weathericon= response.weather[0].icon;
         const iconurl="https://openweathermap.org/img/wn/"+weathericon +"@2x.png";
         // The date format method is taken from the  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
@@ -50,34 +53,45 @@ function currentWeather(city){
         // parse the response to display the current temperature.
 
         const tempF = response.main.temp;
-        $(currentTemperature).html((tempF).toFixed(2)+"&#8457");
+        currentTemperature.html((tempF).toFixed(2)+"&#8457");
         // Display the Humidity
-        $(currentHumidity).html(response.main.humidity+"%");
-        //Display Wind speed and convert to MPH
+        currentHumidity.html(response.main.humidity+"%");
+        //Display Wind speed as well as parse info from response
         const ws=response.wind.speed;
-        $(currentWSpeed).html(ws+"MPH");
+        currentWSpeed.html(ws+"MPH");
         
         if(response.weather[0].main === "Clouds") {
             $("body").addClass("cloudy");
             $("body").removeClass("rain");
             $("body").removeClass("sunny");
             $("body").removeClass("snow");
+            $("body").removeClass("thunder");
         }else if(response.weather[0].main === "Rain") {
             $("body").addClass("rain");
             $("body").removeClass("cloudy");
             $("body").removeClass("sunny");
             $("body").removeClass("snow");
+            $("body").removeClass("thunder");
         }else if(response.weather[0].main === "Snow") {
             $("body").addClass("snow");
             $("body").removeClass("cloudy");
             $("body").removeClass("sunny");
-            $("body").removeClass("rain");  
+            $("body").removeClass("rain"); 
+            $("body").removeClass("thunder");
         }else if(response.weather[0].main === "Clear") {
             $("body").addClass("sunny");
             $("body").removeClass("cloudy");
             $("body").removeClass("snow");
             $("body").removeClass("rain");  
-        }
+            $("body").removeClass("thunder");
+        }else if(response.weather[0].main === "Thunder") {
+            $("body").addClass("thunder");
+            $("body").removeClass("sunny");
+            $("body").removeClass("cloudy");
+            $("body").removeClass("snow");
+            $("body").removeClass("rain"); 
+        };
+
         forecast(response.id);
         if(response.cod==200){
             sCity=JSON.parse(localStorage.getItem("cityname"));
@@ -101,7 +115,7 @@ function currentWeather(city){
     });
 }
  
-// Here we display the 5 days forecast for the current city.
+// Here we display the 5 days forecast for the current city and populate data for each day
 function forecast(cityid){
     const dayover= false;
      fetch(`https://api.openweathermap.org/data/2.5/forecast?id=${cityid}&units=imperial&appid=${APIKey}`)
@@ -131,7 +145,7 @@ function forecast(cityid){
     });
 }
 
-// add the passed city on the search history
+// add the past city on the search history
 function addToList(c){
     const listEl= $("<li>"+c.toUpperCase()+"</li>");
     $(listEl).attr("class","list-group-item");
