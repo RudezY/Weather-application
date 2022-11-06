@@ -163,7 +163,7 @@ function pastSearchHistory(event){
 
 }
 
-// render function
+// render previous city to display under search input
 function loadLastCity(){
     $("ul").empty();
     const sCity = JSON.parse(localStorage.getItem("cityname"));
