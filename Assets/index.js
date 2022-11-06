@@ -50,6 +50,7 @@ function currentWeather(city){
         const date=new Date(response.dt*1000).toLocaleDateString();
         //parse the response for name of city and concatenating the date and icon.
         $(currentCity).html(response.name +"("+date+")" + "<img src="+iconurl+">");
+        
         // parse the response to display the current temperature.
 
         const tempF = response.main.temp;
@@ -91,7 +92,7 @@ function currentWeather(city){
             $("body").removeClass("snow");
             $("body").removeClass("rain"); 
         };
-
+// sets city names to local storage if it doesn't exist
         forecast(response.id);
         if(response.cod==200){
             sCity=JSON.parse(localStorage.getItem("cityname"));
@@ -191,10 +192,6 @@ $(window).on("load",loadLastCity);
 $("#clear-history").on("click",clearHistory);
 
 });
-
-
-
-
 
 
 
